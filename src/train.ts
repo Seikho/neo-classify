@@ -1,8 +1,8 @@
 import db, { cypher } from './db'
-import set from '../training'
+import inputs from '../training'
 import slug from './slug'
 
-export default async function train(inputs: TrainingInput[]) {
+export default async function train() {
     for (const input of inputs) {
         const msg = slug(input.message)
         const split = msg.split('-')
@@ -25,7 +25,7 @@ function toUpsert(words: string[], relation: Relation) {
     const merges: string[] = []
     const wordIds: string[] = []
 
-    merges.push(`MERGE (doc: Document { words: '${words.join('-') }' })`)
+    merges.push(`MERGE (doc: Document { words: '${words.join('-')}' })`)
 
     for (const word of words) {
         const id = `w${merges.length}`
@@ -61,7 +61,12 @@ function toUpsert(words: string[], relation: Relation) {
     }
 }
 
+function deleteAll() {
+    return cypher({
+        query: `MATCH nn DETACH DELETE ALL`
+    })
+}
 
-
-train(set)
+deleteAll()
+    .then(train)
     .then(() => process.exit(0))
