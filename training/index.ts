@@ -63,6 +63,19 @@ const set: TrainingInput[] = [
                 tags: ['drink', 'dairy']
             }
         ]
+    },
+    {
+        message: 'i enjoy hot coffee',
+        relations: [
+            {
+                type: 'sentiment',
+                tags: ['positive']
+            },
+            {
+                type: 'topic',
+                tags: ['caffiene', 'drink', 'dairy']
+            }
+        ]
     }
 ]
 
