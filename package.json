@@ -2,22 +2,25 @@
   "name": "neo-classify",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/dotenv": "^4.0.0",
+    "@types/needle": "^2.0.2",
     "@types/neo4j": "^2.0.0",
     "@types/node": "^7.0.27",
     "dotenv": "^4.0.0",
-    "env-cmd": "^5.1.0",
-    "typescript": "^2.3.4"
+    "prettier": "^1.11.1",
+    "typescript": "^2.8.1"
   },
   "dependencies": {
+    "needle": "^2.2.0",
     "neo4j": "^2.0.0-RC2"
   }
 }
