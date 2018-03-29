@@ -1,36 +1,61 @@
-import * as graph from 'neo4j'
-import * as assert from 'assert'
-import * as dotenv from 'dotenv'
-import * as path from 'path'
+import { GraphDatabase, CypherOptions } from 'neo4j'
+export { connection, configure, cypher }
 
-dotenv.config({
-    path: path.resolve(__dirname, '..', '.env')
-})
+export type Connection =
+  | string
+  | {
+      host: string
+      user: string
+      password: string
+      port?: string
+      protocol?: string
+    }
 
 const host = process.env.NEO4J_HOST
 const user = process.env.NEO4J_USER
 const password = process.env.NEO4J_PASSWORD
 const port = process.env.NEO4J_PORT || 7474
-const protocol = process.env.NEO4J_PROTOCOL || 'https'
+const protocol = process.env.NEO4J_PROTOCOL || 'http'
 
-assert(host, 'NEO4J_HOST not set')
-assert(user, 'NEO4J_USER not set')
-assert(password, 'NEO4J_PASSWORD not set')
+let connectionString =
+  process.env.NEO4J_CONNECTION_STRING || `${protocol}://${user}:${password}@${host}:${port}`
 
-const db = new graph.GraphDatabase(`${protocol}://${user}:${password}@${host}:${port}`)
+let _db: GraphDatabase | undefined
 
-export default db
+const connection = {
+  get db() {
+    if (!_db) {
+      _db = new GraphDatabase(connectionString)
+    }
+    return _db
+  }
+}
 
-export function cypher<T>(options: graph.CypherOptions) {
-    const promise = new Promise<T>((resolve, reject) => {
-        db.cypher(options, (err, result) => {
-            if (err) {
-                return reject(err)
-            }
+function configure(connection?: Connection) {
+  if (!connection) {
+    return
+  }
 
-            resolve(result)
-        })
+  if (typeof connection === 'string') {
+    connectionString = connection
+    return
+  }
+  const { host, user, password, port = 7474, protocol = 'http' } = connection
+  connectionString = `${protocol}://${user}:${password}@${host}:${port}`
+}
+
+function cypher<T>(options: CypherOptions) {
+  const db = connection.db
+
+  const promise = new Promise<T>((resolve, reject) => {
+    db.cypher(options, (err, result) => {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve(result)
     })
+  })
 
-    return promise
+  return promise
 }

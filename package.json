@@ -1,26 +1,34 @@
 {
   "name": "neo-classify",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Text Classification with Naive Bayes implementation using Neo4j",
   "main": "src/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "naive",
+    "bayes",
+    "graph",
+    "neo4j",
+    "text",
+    "classification"
+  ],
+  "author": "Carl Winkler",
   "license": "MIT",
+  "files": [
+    "types",
+    "src"
+  ],
   "devDependencies": {
-    "@types/dotenv": "^4.0.0",
-    "@types/needle": "^2.0.2",
     "@types/neo4j": "^2.0.0",
     "@types/node": "^7.0.27",
-    "dotenv": "^4.0.0",
     "prettier": "^1.11.1",
     "typescript": "^2.8.1"
   },
   "dependencies": {
-    "needle": "^2.2.0",
     "neo4j": "^2.0.0-RC2"
   }
 }

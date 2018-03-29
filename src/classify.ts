@@ -1,6 +1,7 @@
 import slug from './slug'
 import getClassifications from './classifications'
 import { cypher } from './db'
+import { Classification } from './types'
 
 export async function classify(rawMessage: string) {
   const msg = slug(rawMessage)
@@ -10,19 +11,11 @@ export async function classify(rawMessage: string) {
   return count
 }
 
-type Counts = {
-  total: number
-  docs: { [cls: string]: { [type: string]: number } }
-  relations: { [cls: string]: { [type: string]: number } }
-  words: { [word: string]: { [cls: string]: { [type: string]: number } } }
-  results: { [cls: string]: { [type: string]: { percent: number; probability: number } } }
-}
-
 async function classifyDocument(words: string[]) {
   const total: any = await getTotalWords()
   const classifications = await getClassifications()
 
-  const counts: Counts = {
+  const result: Classification = {
     total: total[0].count,
     docs: {},
     relations: {},
@@ -31,68 +24,73 @@ async function classifyDocument(words: string[]) {
   }
 
   for (const cls of Object.keys(classifications)) {
-    await getClassification(counts, cls, classifications[cls], words)
+    await getClassification(result, cls, classifications[cls], words)
   }
 
-  return counts
+  return result
 }
 
-async function getClassification(counts: Counts, cls: string, types: string[], words: string[]) {
-  counts.results[cls] = {}
-  counts.relations[cls] = {}
-  counts.docs[cls] = {}
+async function getClassification(
+  counts: Classification,
+  type: string,
+  tags: string[],
+  words: string[]
+) {
+  counts.results[type] = {}
+  counts.relations[type] = {}
+  counts.docs[type] = {}
 
-  for (const type of types) {
-    const query = `MATCH (:Word)-[r:HAS_ATTR]->(:Attr { type: '${cls}', value: '${type}' })
+  for (const tag of tags) {
+    const query = `MATCH (:Word)-[r:HAS_ATTR]->(:Attr { type: '${type}', value: '${tag}' })
             RETURN count(r) as count`
 
     const result = await cypher<Array<{ count: number }>>({ query })
-    counts.relations[cls][type] = result[0].count
+    counts.relations[type][tag] = result[0].count
   }
 
-  for (const type of types) {
-    const query = `MATCH (:Document)-[r:HAS_ATTR]->(:Attr { type: '${cls}', value: '${type}' })
+  for (const tag of tags) {
+    const query = `MATCH (:Document)-[r:HAS_ATTR]->(:Attr { type: '${type}', value: '${tag}' })
             RETURN count(r) as count`
 
     const result = await cypher<Array<{ count: number }>>({ query })
-    counts.docs[cls][type] = result[0].count
+    counts.docs[type][tag] = result[0].count
   }
 
   for (const word of words) {
     counts.words[word] = {}
-    counts.words[word][cls] = {}
+    counts.words[word][type] = {}
 
-    for (const type of types) {
-      const query = `MATCH (:Word { name: '${word}' })-[r:HAS_ATTR]->(:Attr { type: '${cls}', value: '${type}' })
+    for (const tag of tags) {
+      const query = `MATCH (:Word { name: '${word}' })-[r:HAS_ATTR]->(:Attr { type: '${type}', value: '${tag}' })
                 RETURN count(r) as count`
 
       const result = await cypher<Array<{ count: number }>>({ query })
-      counts.words[word][cls][type] = result[0].count
+      counts.words[word][type][tag] = result[0].count
     }
   }
 
-  for (const type of types) {
+  for (const tag of tags) {
     const t = counts.total
-    const p = counts.docs[cls][type] / t
+    const p = counts.docs[type][tag] / t
 
-    const tS = counts.relations[cls][type]
+    const tS = counts.relations[type][tag]
     const probs: number[] = []
 
-    counts.results[cls][type] = { percent: 0, probability: 0 }
+    counts.results[type][tag] = { percent: 0, probability: 0 }
 
     for (const word of words) {
-      const w = counts.words[word][cls][type]
+      const w = counts.words[word][type][tag]
       probs.push((w + 1) / (tS + t))
     }
 
-    counts.results[cls][type].probability = probs.reduce((prev, curr) => p * curr, p)
+    counts.results[type][tag].probability = probs.reduce((_prev, curr) => p * curr, p)
   }
 
-  const totalProb = types.reduce((prev, curr) => prev + counts.results[cls][curr].probability, 0)
+  const totalProb = tags.reduce((prev, tag) => prev + counts.results[type][tag].probability, 0)
 
-  for (const type of types) {
-    const probability = counts.results[cls][type].probability
-    counts.results[cls][type].percent = probability / totalProb * 100
+  for (const tag of tags) {
+    const probability = counts.results[type][tag].probability
+    counts.results[type][tag].percent = probability / totalProb * 100
   }
 }
 
