@@ -12,7 +12,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/neo4j@^2.0.0":
+"@types/neo4j@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@types/neo4j/-/neo4j-2.0.2.tgz#da6e0871dcbcf9a27558ad5e5e0b6c2c6b89a1fb"
   dependencies:

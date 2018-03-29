@@ -8,17 +8,31 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "keywords": ["naive", "bayes", "graph", "neo4j", "text", "classification"],
+  "keywords": [
+    "naive",
+    "bayes",
+    "graph",
+    "neo4j",
+    "text",
+    "classification"
+  ],
   "author": "Carl Winkler",
   "license": "MIT",
-  "files": ["types", "src", "package.json", "readme.md", "tsconfig.json", "yarn.lock"],
+  "files": [
+    "types",
+    "src",
+    "package.json",
+    "readme.md",
+    "tsconfig.json",
+    "yarn.lock"
+  ],
   "devDependencies": {
-    "@types/neo4j": "^2.0.0",
     "@types/node": "^7.0.27",
     "prettier": "^1.11.1",
     "typescript": "^2.8.1"
   },
   "dependencies": {
+    "@types/neo4j": "^2.0.2",
     "neo4j": "^2.0.0-RC2"
   }
 }
