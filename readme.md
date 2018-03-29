@@ -16,7 +16,7 @@ $ npm i neo-classify
 ```ts
 import { configure, train, classify } from 'neo-classify'
 
-configure('http://username:password@localhost:7474)
+configure('http://username:password@localhost:7474')
 // or
 configure({ host: 'localhost', user: 'username', password: 'password', port: 7474, protocol: 'https' })
 
@@ -46,4 +46,8 @@ async function example() {
     results: { [type: string]: { [tag: string]: { percent: number; probability: number } } }
   }
 }
+
 ```
+
+# License
+MIT
